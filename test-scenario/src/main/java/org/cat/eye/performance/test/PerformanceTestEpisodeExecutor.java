@@ -48,7 +48,7 @@ public class PerformanceTestEpisodeExecutor<T> {
 
         service.shutdownNow();
 
-        System.out.println("Отстанов");
+        System.out.println("Stop");
     }
 
 }
