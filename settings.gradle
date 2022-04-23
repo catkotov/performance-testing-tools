@@ -1,2 +1,2 @@
 rootProject.name = 'performance-testing-tools'
-include('app', 'test-scenario')
+include('demo', 'test-scenario')

@@ -1,10 +1,10 @@
-package org.cat.eye.performance.test.app;
+package org.cat.eye.performance.test.demo;
 
 import org.cat.eye.performance.test.PerformanceTestScenario;
 
 import java.util.function.Consumer;
 
-public class App {
+public class PerformanceTestScenarioDemo {
     public static void main(String[] args) {
 
         Consumer<String> consumer = obj -> System.out.println("Send message: " + obj);
