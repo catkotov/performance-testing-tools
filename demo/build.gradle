@@ -8,5 +8,5 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'org.cat.eye.performance.test.app.App'
+    mainClass = 'org.cat.eye.performance.test.demo.PerformanceTestScenarioDemo'
 }
