@@ -1,41 +1,65 @@
 package org.cat.eye.performance.test;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * This class provides action on an object that should be repeatedly done during the performance testing.
- * As an example you can repeatedly send requests to a service.
+ * This class provides an execution of a periodic action with defined rate and duration.
  *
- * @param <T> type of the object
+ * @param <T> type of the object on that actions episode should be done.
  */
-public class PerformanceTestEpisode<T> implements Runnable {
+public class PerformanceTestEpisode<T> {
 
+    private final int rate;
     private final CountDownLatch latch;
-    private final AtomicInteger count;
-    private final Consumer<T> action;
-    private final T actionObject;
+    private final ScheduledThreadPoolExecutor service;
+    private final PerformanceTestAction<T> testEpisode;
 
     /**
-     * Constructor of the action executor.
+     * Constructor of the actions' executor.
      *
-     * @param latch - count down latch for figuring out actions number during performance testing.
-     * @param action - action on an object.
-     * @param actionObject - object that will be used by the action.
+     * @param object - object on that action should be done.
+     * @param action - periodically executed action.
+     * @param rate - actions execution rate (in actions/second).
+     * @param duration - durations of the actions (in seconds).
      */
-    public PerformanceTestEpisode(CountDownLatch latch, Consumer<T> action, T actionObject) {
-        this.latch = latch;
-        this.count = new AtomicInteger(0);
-        this.action = action;
-        this.actionObject = actionObject;
+    public PerformanceTestEpisode(T object, Consumer<T> action, int rate, int duration) {
+
+        this.rate = rate;
+        latch = new CountDownLatch(rate * duration);
+
+        if (rate <= 500)
+            service = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(rate);
+        else
+            service = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(500);
+
+        service.setRemoveOnCancelPolicy(true);
+
+        testEpisode = new PerformanceTestAction<>(latch, action, object);
     }
 
-    @Override
-    public void run() {
-        System.out.println("Thread - " + count.addAndGet(1));
-        action.accept(actionObject);
-        latch.countDown();
+    /**
+     * This method submits a series ot the actions.
+     */
+    public void submit() {
+
+        service.scheduleAtFixedRate(
+                this.testEpisode,
+                0,
+                1000 / rate,
+                TimeUnit.MILLISECONDS
+        );
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        service.shutdownNow();
     }
 
 }

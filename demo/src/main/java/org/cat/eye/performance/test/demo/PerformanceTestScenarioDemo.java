@@ -15,7 +15,7 @@ public class PerformanceTestScenarioDemo {
                 .addEpisode(obj, consumer, 10, 10)
                 .addEpisode(obj, consumer, 50, 40)
                 .addEpisode(obj, consumer, 20, 20)
-                .execute();
+                .play();
     }
 
 }
